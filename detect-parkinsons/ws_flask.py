@@ -1,10 +1,12 @@
 #!flask/bin/python
-from flask import Flask, request, Response, render_template
+from flask import Flask, request, Response
 import json
 import base64
 from ParkinsonOpenCV import *
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def index():
@@ -12,19 +14,13 @@ def index():
 
 def return_result(result):
     ret = {}
-    if result:
-        ret["code"] = 0
+    if result == 1:
+        ret["code"] = 1
         ret["message"] = "Saludable"
     else:
-        ret["code"] = 1
+        ret["code"] = 0
         ret["message"] = "Posible Parkinson"
     return json.dumps(ret) 
-
-#def decode_image(imgstring):
-#    imgdata = base64.b64decode(imgstring)
-#    filename = 'some_image.jpg'  
-#    with open(filename, 'wb') as f:
-#        f.write(imgdata)
 
 def get_data(data):
     json_data = json.loads(data)
@@ -33,11 +29,15 @@ def get_data(data):
 
 @app.route('/pk_ia', methods=["POST"])
 def pk_id():
+    print('entro al metodo')
     pk = ParkinsonOpenCV()
-    json_data = get_data(request.data)
+    #print(request.data.decode("utf-8"))
+    print('esta aqui')
+    json_data = get_data(request.data.decode("utf-8"))
     result = pk.get_Parkinson_diagnosis(json_data["name"])
+    print ('resultado = ' + str(result))
     #decode_image(json_data["name"])
     return Response(return_result(result), mimetype="application/json")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('192.168.1.55', debug=True, port=3389)

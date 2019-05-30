@@ -19,7 +19,8 @@ class ParkinsonOpenCV():
 
 	trained = False
 	model = None
-	le = None
+	le = None	
+	testingPath = ''
 
 	def quantify_image(self,image):
 		# compute the histogram of oriented gradients feature vector for
@@ -66,26 +67,27 @@ class ParkinsonOpenCV():
 
 	def decode_image(self,imgstring):
 		imgdata = base64.b64decode(imgstring)
-		filename = '/home/usuario/Descargas/proyectos/detect-parkinsons/dataset/spiral/mia/ingreso.png'
+		filename = '/home/usuario/Descargas/GIT/Proyectos_Python/detect-parkinsons/dataset/spiral/testing/healthy/ingreso.png'
 		with open(filename, 'wb') as f:
 			f.write(imgdata)
 
 	def training_model(self):
 		folder_data = "dataset/spiral"
-		trial = 1
+		trial = 25
 
 		# define the path to the training and testing directories
 		trainingPath = os.path.sep.join([folder_data, "training"])
-		testingPath = os.path.sep.join([folder_data, "testing"])
-
+		ParkinsonOpenCV.testingPath = os.path.sep.join([folder_data, "testing"])
+		print('El valor del path en el training es: {}'.format(ParkinsonOpenCV.testingPath))
 		# loading the training and testing data
 		print("[INFO] loading data...")
 		(trainX, trainY) = self.load_split(trainingPath)
-		(testX, testY) = self.load_split('/home/usuario/Descargas/proyectos/detect-parkinsons/dataset/spiral/')
+		(testX, testY) = self.load_split(ParkinsonOpenCV.testingPath)
 
 		# encode the labels as integers
 		le = LabelEncoder()
 		trainY = le.fit_transform(trainY)
+		print('el valor de testY es: {}'.format(testY))
 		testY = le.transform(testY)
 
 		# initialize our trials dictionary
@@ -142,16 +144,17 @@ class ParkinsonOpenCV():
 		# randomly select a few images and then initialize the output images
 		# for the montage
 
+		if not ParkinsonOpenCV.trained:
+			ParkinsonOpenCV.model,ParkinsonOpenCV.le = self.training_model()
 		self.decode_image(image_encode)
-
-		testingPaths = list(paths.list_images('/home/usuario/Descargas/proyectos/detect-parkinsons/dataset/spiral/mia'))
+		print('El valor del path es: {}'.format(ParkinsonOpenCV.testingPath) )
+		testingPaths = list(paths.list_images('/home/usuario/Descargas/GIT/Proyectos_Python/detect-parkinsons/dataset/spiral/testing/healthy'))
 		idxs = np.arange(0, len(testingPaths))
 		idxs = np.random.choice(idxs, size=(1,), replace=True)
 		images = []
-		if not ParkinsonOpenCV.trained:
-			ParkinsonOpenCV.model,ParkinsonOpenCV.le = self.training_model()
 		# loop over the testing samples
-		for i in idxs:
+		for i in range(1):
+			print('imagen en el for: {}'.format(testingPaths[i]))
 			# load the testing image, clone it, and resize it
 			image = cv2.imread(testingPaths[i])
 			output = image.copy()
@@ -167,22 +170,24 @@ class ParkinsonOpenCV():
 			# features using the last trained Random Forest
 			features = self.quantify_image(image)
 			preds = ParkinsonOpenCV.model.predict([features])
+			
+			print('valor de decision_path {}'.format(ParkinsonOpenCV.model.decision_path([features])))
 			label = ParkinsonOpenCV.le.inverse_transform(preds)[0]
 
 			# draw the colored class label on the output image and add it to
 			# the set of output images
+			print ('Label de la imagen {}'.format(label))
 			if label == "healthy":
 				return 1
 			else:
 				return 0
-			color = (0, 255, 0) if label == "healthy" else (0, 0, 255)
-			cv2.putText(output, label, (3, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-				color, 2)
-			images.append(output)
+			#color = (0, 255, 0) if label == "healthy" else (0, 0, 255)
+			#cv2.putText(output, label, (3, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,color, 2)
+			#images.append(output)
 
-		# create a montage using 128x128 "tiles" with 5 rows and 5 columns
-		montage = build_montages(images, (128, 128), (5, 5))[0]
+		#create a montage using 128x128 "tiles" with 5 rows and 5 columns
+		#montage = build_montages(images, (128, 128), (5, 5))[0]
 
 		
-		cv2.imshow("Output", montage)
-		cv2.waitKey(0)
+		#cv2.imshow("Output", montage)
+		#cv2.waitKey(0)

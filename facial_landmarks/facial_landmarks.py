@@ -121,7 +121,7 @@ for (i, imagePath) in enumerate(imagePaths):
 		cont_tot = 0
 		cont = 0
 		end = time.time()
-		print('Tiempo total {}'.format(end - start))
+print('Tiempo total {}'.format(end - start))
 # show the output image with the face detections + facial landmarks
 		#cv2.imshow("Output", image)
 		#cv2.waitKey(0)
