@@ -23,7 +23,7 @@ class ParkinsonOpenCV():
 		return filename
 
 	def pre_process_image(self, image):
-		image = cv2.resize(image, (28, 28))
+		image = cv2.resize(image, (128, 128))
 		image = image.astype("float") / 255.0
 		image = img_to_array(image)
 		image = np.expand_dims(image, axis=0)
@@ -31,14 +31,14 @@ class ParkinsonOpenCV():
 
 	def get_Parkinson_diagnosis(self,image_encodeB64):
 		K.clear_session()
-		modelo = 'parkinson.model'
+		modelo = 'santa_not_santa.model'
 		filename = self.decode_image(image_encodeB64)
 		image = cv2.imread(filename)
 		orig = image.copy()
 		image = self.pre_process_image(image)
 		model = load_model(modelo)
 		(notSanta, santa) = model.predict(image)[0]
-		label = "Healthy" if santa > notSanta else "Parkinson"
+		label = "Santa" if santa > notSanta else "No Santa"
 		proba = santa if santa > notSanta else notSanta
 		K.clear_session()
 		os.remove(filename)

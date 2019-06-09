@@ -20,19 +20,14 @@ def return_result(result):
 
 def get_data(data):
     json_data = json.loads(data)
-    #print("Deserialized data: {}".format(data))
     return json_data
 
 @app.route('/pk_ia', methods=["POST"])
 def pk_id():
-    print('entro al metodo')
     pk = ParkinsonOpenCV()
-    #print(request.data.decode("utf-8"))
-    print('esta aqui')
     json_data = get_data(request.data.decode("utf-8"))
     result = pk.get_Parkinson_diagnosis(json_data["name"])
     print ('resultado = ' + str(result))
-    #decode_image(json_data["name"])
     return Response(return_result(result), mimetype="application/json")
 
 if __name__ == '__main__':
