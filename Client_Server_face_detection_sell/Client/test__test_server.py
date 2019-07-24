@@ -22,10 +22,8 @@ def add_face():
         nparr = np.fromstring(imageString, np.uint8)
 
         #  let opencv decode image to correct format
-        #img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
-        #cv2.imwrite('img.jpg', img)
-        im = from_base64(imageString)
-        cv2.imwrite('myloadedfile.png', im)
+        img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
+        cv2.imwrite('img.jpg', img)
         
 		
 		#cv2.imshow("frame", img)
