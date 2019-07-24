@@ -1,6 +1,8 @@
 import cv2
 import sys
 from time import sleep
+import requests
+import base64
 
 cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -15,9 +17,12 @@ while True:
 		minNeighbors=5,
 		minSize=(30, 30),
 		flags=cv2.CASCADE_SCALE_IMAGE
-	)
-	if len(faces) > 0:		
+	)	
+	if len(faces) > 0:	
+		img = base64.b64encode(frame)
+		response = requests.post("http://127.0.0.1:5000/add_face", data={"name":"obama", "img":str(img)})
 		print 'call webservice and send frame'
+		break
 	for (x, y, w, h) in faces:
 		cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 	cv2.imshow('Video', frame)
