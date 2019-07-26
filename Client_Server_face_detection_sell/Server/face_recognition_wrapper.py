@@ -15,15 +15,18 @@ class face_recognition_wrapper:
 
 	encodes_path = "/home/user/GIT/Proyectos_Python/Client_Server_face_detection_sell/Server/encodings.pickle"
 	detection_method = "cnn" # or "hog"
+	global_connection = None
 	
-	def connect_db(self):
-		
-		connection = psycopg2.connect(user = "postgres",
-								password = "pass@#29",
-								host = "127.0.0.1",
-								port = "5432",
-								database = "postgres_db")
-
+	def connect_db(self):		
+		try:
+			if not self.global_connection:
+				self.global_connection = psycopg2.connect(user = "postgres",
+										password = "postgres",
+										host = "127.0.0.1",
+										port = "5432",
+										database = "face_data")
+		except (Exception, psycopg2.Error) as error :
+			print ("Error while connecting to PostgreSQL", error)
 	
 	def get_image_from_str64(self,image64):
 		imageString = base64.b64decode(image64)
@@ -33,13 +36,18 @@ class face_recognition_wrapper:
 		img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
 		return img
 
-	
 	def worker(self,image64):
 		# load the known faces and embeddings
+		print("[INFO] Connecting DataBase...")
+		if not self.global_connection:
+			self.connect_db()
+		print (self.global_connection.get_dsn_parameters(),"\n")
+		cursor = self.global_connection.cursor()
+		
 		print("[INFO] loading encodings...")
 		data = pickle.loads(open(self.encodes_path, "rb").read())
 
-		# load the input image and convert it from BGR to RGB
+		print("[INFO] load the input image and convert it from BGR to RGB")
 		image = self.get_image_from_str64(image64)
 		rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -53,6 +61,7 @@ class face_recognition_wrapper:
 
 		# initialize the list of names for each face detected
 		names = []
+		persons = []
 
 		# loop over the facial embeddings
 		for encoding in encodings:
@@ -83,15 +92,21 @@ class face_recognition_wrapper:
 			
 			# update the list of names
 			names.append(name)
+			cursor.execute("SELECT * from person where name = '{}'".format(name))
+			persons.append(cursor.fetchone())
 
 		# loop over the recognized faces
-		for ((top, right, bottom, left), name) in zip(boxes, names):
-			# draw the predicted face name on the image
-			cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 2)
-			y = top - 15 if top - 15 > 15 else top + 15
-			cv2.putText(image, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
-				0.75, (0, 255, 0), 2)
+		#for ((top, right, bottom, left), name) in zip(boxes, names):
+		#	# draw the predicted face name on the image
+		#	cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 2)
+		#	y = top - 15 if top - 15 > 15 else top + 15
+		#	cv2.putText(image, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+		#		0.75, (0, 255, 0), 2)
 
 		# show the output image
-		cv2.imshow("Image", image)
-		cv2.waitKey(0)
+		# cv2.imshow("Image", image)
+		# cv2.waitKey(0)
+		if(connection):
+			cursor.close()
+			self.global_connection.close()
+		return persons

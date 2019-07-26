@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from importlib import import_module
 import pandas as pd
 import cv2
@@ -17,10 +17,11 @@ def from_base64(base64_data):
 def add_face():
     if request.method == 'POST':
         #  read encoded image
+        print("[INFO] Request desde: {}".format(request.form['name']))
         img_request = request.form['img']
-        print(img_request)
+        #print(img_request)
         frw = face_recognition_wrapper()
-        frw.worker(img_request)
+        resp = frw.worker(img_request)
         #imageString = base64.b64decode(img_request)
         #  convert binary data to numpy array
         #nparr = np.fromstring(imageString, np.uint8)
@@ -32,7 +33,8 @@ def add_face():
         print ("entro")
         #cv2.imshow("frame", img)
         #cv2.waitKey(0)
+        return Response(resp, mimetype='text/xml') # este tipo hay que validarlo porque tambien funciona sin el
 
-    return "list of names & faces"
+    #return "list of names & faces"
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
