@@ -19,12 +19,12 @@ while True:
 		flags=cv2.CASCADE_SCALE_IMAGE
 	)	
 	if len(faces) > 0:
-		#cv2.imwrite('capture.jpg', frame)
+		cv2.imwrite('capture.jpg', frame)
 		with open("capture.jpg", "rb") as imageFile:
 			img = base64.b64encode(imageFile.read())
-		img = base64.b64encode(frame)
-		response = requests.post("http://127.0.0.1:5000/add_face", data={"name":"obama", "img":str(img)})
-		print ('call webservice and send frame')		
+		#img = base64.b64encode(frame)
+		response = requests.post("http://127.0.0.1:5000/add_face", data={"name":"127.0.0.cliente", "img":str(img)})
+		print ('call webservice and recive from server: {}'.format(response.content))
 	for (x, y, w, h) in faces:
 		cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 	cv2.imshow('Video', frame)

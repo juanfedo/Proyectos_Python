@@ -48,7 +48,9 @@ class face_recognition_wrapper:
 		data = pickle.loads(open(self.encodes_path, "rb").read())
 
 		print("[INFO] load the input image and convert it from BGR to RGB")
+		#print (image64)
 		image = self.get_image_from_str64(image64)
+		cv2.imwrite('img.jpg', image)
 		rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 		# detect the (x, y)-coordinates of the bounding boxes corresponding
@@ -92,7 +94,8 @@ class face_recognition_wrapper:
 			
 			# update the list of names
 			names.append(name)
-			cursor.execute("SELECT * from person where name = '{}'".format(name))
+			cursor.execute("SELECT * from person where id = '{}'".format(name))
+			#cursor.execute("SELECT * from person where id = 1")
 			persons.append(cursor.fetchone())
 
 		# loop over the recognized faces
@@ -106,7 +109,7 @@ class face_recognition_wrapper:
 		# show the output image
 		# cv2.imshow("Image", image)
 		# cv2.waitKey(0)
-		if(connection):
+		if(self.global_connection):
 			cursor.close()
 			self.global_connection.close()
 		return persons

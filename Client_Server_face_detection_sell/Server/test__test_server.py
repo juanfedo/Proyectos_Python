@@ -4,6 +4,8 @@ import pandas as pd
 import cv2
 import numpy as np
 import base64
+import json
+from flask import jsonify
 from face_recognition_wrapper import face_recognition_wrapper
 
 #frw = import_module('face_recognition_wrapper').face_recognition_wrapper
@@ -30,10 +32,11 @@ def add_face():
         #img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
         #cv2.imwrite('img.jpg', img)
         
-        print ("entro")
+        print ("[INFO] respuesta del server: {}".format(resp))
         #cv2.imshow("frame", img)
         #cv2.waitKey(0)
-        return Response(resp, mimetype='text/xml') # este tipo hay que validarlo porque tambien funciona sin el
+        response = app.response_class(response=json.dumps(resp),status=200,mimetype='application/json')
+        return response
 
     #return "list of names & faces"
 if __name__ == '__main__':
