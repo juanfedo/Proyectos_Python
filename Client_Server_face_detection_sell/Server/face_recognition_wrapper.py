@@ -13,7 +13,7 @@ import psycopg2
 
 class face_recognition_wrapper:
 
-	encodes_path = "/home/user/GIT/Proyectos_Python/Client_Server_face_detection_sell/Server/encodings.pickle"
+	encodes_path = "encodings.pickle"
 	detection_method = "cnn" # or "hog"
 	global_connection = None
 	
@@ -94,7 +94,8 @@ class face_recognition_wrapper:
 			
 			# update the list of names
 			names.append(name)
-			cursor.execute("SELECT * from person where id = '{}'".format(name))
+			print("name of the person " + name)
+			cursor.execute("SELECT * from person where name = '{}'".format(name))
 			#cursor.execute("SELECT * from person where id = 1")
 			persons.append(cursor.fetchone())
 
