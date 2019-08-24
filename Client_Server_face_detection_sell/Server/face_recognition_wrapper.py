@@ -96,7 +96,6 @@ class face_recognition_wrapper:
 			names.append(name)
 			print("name of the person " + name)
 			cursor.execute("SELECT * from person where name = '{}'".format(name))
-			#cursor.execute("SELECT * from person where id = 1")
 			persons.append(cursor.fetchone())
 
 		# loop over the recognized faces
