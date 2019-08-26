@@ -46,10 +46,8 @@ class face_recognition_wrapper:
 		
 		print("[INFO] loading encodings...")
 		data = pickle.loads(open(self.encodes_path, "rb").read())
-
-		print("[INFO] load the input image and convert it from BGR to RGB")
-		#print (image64)
-		image = self.get_image_from_str64(image64)
+		print("[INFO] load the input image and convert it from BGR to RGB")		
+		image = self.get_image_from_str64(image64)		
 		cv2.imwrite('img.jpg', image)
 		rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -95,21 +93,28 @@ class face_recognition_wrapper:
 			# update the list of names
 			names.append(name)
 			print("name of the person " + name)
-			cursor.execute("SELECT * from person where name = '{}'".format(name))
-			persons.append(cursor.fetchone())
 
 		# loop over the recognized faces
-		#for ((top, right, bottom, left), name) in zip(boxes, names):
-		#	# draw the predicted face name on the image
-		#	cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 2)
-		#	y = top - 15 if top - 15 > 15 else top + 15
-		#	cv2.putText(image, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
-		#		0.75, (0, 255, 0), 2)
+		for ((top, right, bottom, left), name) in zip(boxes, names):
 
-		# show the output image
-		# cv2.imshow("Image", image)
-		# cv2.waitKey(0)
+			cursor.execute("SELECT full_name,status,name from person where name = '{}'".format(name))
+			itr = cursor.fetchone()
+			if not itr is None: 		
+				data = [top,right,bottom,left,itr[0],itr[1]]		
+				persons.append(data)				
+
 		if(self.global_connection):
 			cursor.close()
 			self.global_connection.close()
-		return persons
+			
+		print("Salida del ws")
+		print(persons)
+		response = ''
+		for person in persons:
+			for p in person:
+				response += str(p)+"%"
+			response = response[:-1]
+			response += '&'
+		if len(response) > 0:
+			response = response[:-1]
+		return response
